@@ -3,64 +3,56 @@ defmodule Image do
 
   alias Mogrify.Image
 
-  def create_image(hex_code: hex_code) do
+  def temp_file(file_name, fun) do
     file_path = "#{to_string(:rand.uniform(1_000_000_000))}.png"
-
-    %Image{path: file_path}
-    |> custom("size", "50x50")
-    |> canvas("#" <> hex_code)
-    |> custom("gravity", "center")
-    |> create(path: ".")
+    fun.(file_path)
 
     file = %{
-      name: hex_code <> ".png",
+      name: "#{file_name}.png",
       body: File.read!(file_path)
     }
 
     File.rm!(file_path)
-
     file
   end
 
-  def create_image(rgb: rgb) do
-    file_path = "#{to_string(:rand.uniform(1_000_000_000))}.png"
-    matches = Regex.run(~r/(\d+)\,\s*(\d+)\,\s*(\d+)/, rgb)
-    destructure([_, r, g, b], matches)
-
-    %Image{path: file_path}
-    |> custom("size", "50x50")
-    |> canvas("rgb(" <> r <> "," <> g <> "," <> b <> ")")
-    |> custom("gravity", "center")
-    |> create(path: ".")
-
-    file = %{
-      name: rgb <> ".png",
-      body: File.read!(file_path)
-    }
-
-    File.rm!(file_path)
-
-    file
+  def create_image(hex_code: hex_code) do
+    temp_file(hex_code, fn path ->
+      %Image{path: path}
+      |> custom("size", "50x50")
+      |> canvas("#" <> hex_code)
+      |> custom("gravity", "center")
+      |> create(path: ".")
+    end)
   end
 
   def create_image(rgba: rgba) do
-    file_path = "#{to_string(:rand.uniform(1_000_000_000))}.png"
-    matches = Regex.run(~r/(\d+)\,\s*(\d+)\,\s*(\d+),\s*(.+)\)/, rgba)
+    matches = Regex.run(~r/(\d+)\,\s*(\d+)\,\s*(\d+)(?:\,\s*(.+))?\)/, rgba)
     destructure([_, r, g, b, a], matches)
 
-    %Image{path: file_path}
-    |> custom("size", "50x50")
-    |> canvas("rgba(" <> r <> "," <> g <> "," <> b <> "," <> a <> ")")
-    |> custom("gravity", "center")
-    |> create(path: ".")
+    a = a || "1"
 
-    file = %{
-      name: rgba <> ".png",
-      body: File.read!(file_path)
-    }
+    temp_file(rgba, fn path ->
+      %Image{path: path}
+      |> custom("size", "50x50")
+      |> canvas("rgba(" <> r <> "," <> g <> "," <> b <> "," <> a <> ")")
+      |> custom("gravity", "center")
+      |> create(path: ".")
+    end)
+  end
 
-    File.rm!(file_path)
+  def create_image(hsla: hsla) do
+    matches = Regex.run(~r/(.+)\,\s*(.+)\,\s*(.+)(?:\,\s*(.+))?\)/, hsla)
+    destructure([_, h, s, l, a], matches)
 
-    file
+    a = a || "1"
+
+    temp_file(hsla, fn path ->
+      %Image{path: path}
+      |> custom("size", "50x50")
+      |> canvas("hsla(" <> h <> "," <> s <> "," <> l <> "," <> a <> ")")
+      |> custom("gravity", "center")
+      |> create(path: ".")
+    end)
   end
 end
