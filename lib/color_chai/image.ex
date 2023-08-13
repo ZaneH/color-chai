@@ -42,7 +42,7 @@ defmodule Image do
   end
 
   def create_image(hsla: hsla) do
-    matches = Regex.run(~r/(.+)\,\s*(.+)\,\s*(.+)(?:\,\s*(.+))?\)/, hsla)
+    matches = Regex.run(~r/([^,]+)\,\s*([^,]+)\,\s*([^,]+)\,?(?:\s*(.+))?\)/, hsla)
     destructure([_, h, s, l, a], matches)
 
     a = a || "1"

@@ -1,6 +1,6 @@
 # Color Chai
 
-Tiny Discord bot that generates swatches from color codes.
+Tiny Discord bot that generates swatches from color codes. Supports hex, rgb(a) and hsl(a) CSS codes.
 
 ## Setup
 
